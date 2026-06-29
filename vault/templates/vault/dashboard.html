@@ -27,7 +27,40 @@
             <form method="POST" id="add-credential-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="button" class="btn-secondary w-100 mb-3" onclick="fetchNewPassword()">🎲 Generate Strong Password</button>
+                <div class="generator-controls mb-3">
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-secondary w-100" onclick="fetchNewPassword()">🎲 Generate Password</button>
+                        <button type="button" class="btn-secondary" onclick="toggleSettings()" title="Settings">⚙️</button>
+                    </div>
+
+                    <div id="generator-settings" class="settings-panel" style="display: none;">
+                        <div class="setting-group-inline" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;">
+                            <label><input type="radio" name="gen_type" value="standard" checked onclick="toggleGenMode()"> Standard</label>
+                            <label><input type="radio" name="gen_type" value="passphrase" onclick="toggleGenMode()"> Passphrase</label>
+                        </div>
+
+                        <div id="standard-settings">
+                            <label>Length: <span id="len-val">16</span></label>
+                            <input type="range" id="gen-length" min="8" max="64" value="16" oninput="document.getElementById('len-val').innerText = this.value">
+
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" id="gen-upper" checked> A-Z (Upper)</label>
+                                <label><input type="checkbox" id="gen-lower" checked> a-z (Lower)</label>
+                                <label><input type="checkbox" id="gen-nums" checked> 0-9 (Numbers)</label>
+                                <label><input type="checkbox" id="gen-syms" checked> Symbols</label>
+                                <label style="grid-column: span 2;"><input type="checkbox" id="gen-ambig"> Exclude Ambiguous (l, 1, O, 0)</label>
+                            </div>
+                        </div>
+
+                        <div id="passphrase-settings" style="display: none;">
+                            <label>Word Count: <span id="word-val">4</span></label>
+                            <input type="range" id="gen-words" min="3" max="10" value="4" oninput="document.getElementById('word-val').innerText = this.value">
+                            
+                            <label style="margin-top: 10px;">Separator:</label>
+                            <input type="text" id="gen-sep" value="-" maxlength="1" style="width: 40px; text-align: center;">
+                        </div>
+                    </div>
+                </div>
                 <button type="submit" class="btn-primary w-100">Save to Vault</button>
             </form>
         {% endif %}
@@ -97,8 +130,36 @@
         }).catch(function() { alert('Failed to copy password.'); });
     }
 
+    function toggleSettings() {
+        let panel = document.getElementById('generator-settings');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleGenMode() {
+        let isPassphrase = document.querySelector('input[name="gen_type"]:checked').value === 'passphrase';
+        document.getElementById('standard-settings').style.display = isPassphrase ? 'none' : 'block';
+        document.getElementById('passphrase-settings').style.display = isPassphrase ? 'block' : 'none';
+    }
+
     function fetchNewPassword() {
-        fetch('/api/generate-password/')
+        let isPassphrase = document.querySelector('input[name="gen_type"]:checked').value === 'passphrase';
+        let url = '/api/generate-password/?';
+
+        if (isPassphrase) {
+            let words = document.getElementById('gen-words').value;
+            let sep = document.getElementById('gen-sep').value;
+            url += `is_passphrase=true&word_count=${words}&separator=${encodeURIComponent(sep)}`;
+        } else {
+            let length = document.getElementById('gen-length').value;
+            let upper = document.getElementById('gen-upper').checked;
+            let lower = document.getElementById('gen-lower').checked;
+            let nums = document.getElementById('gen-nums').checked;
+            let syms = document.getElementById('gen-syms').checked;
+            let ambig = document.getElementById('gen-ambig').checked;
+            url += `length=${length}&use_upper=${upper}&use_lower=${lower}&use_numbers=${nums}&use_symbols=${syms}&exclude_ambiguous=${ambig}`;
+        }
+
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 let passInput = document.getElementById('id_password');

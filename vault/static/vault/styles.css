@@ -113,3 +113,34 @@ button {
 @media (max-width: 800px) {
     .dashboard-grid { grid-template-columns: 1fr; }
 }
+
+.settings-panel {
+    background-color: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+}
+.setting-group-inline {
+    display: flex;
+    gap: 15px;
+}
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+.checkbox-grid label, .setting-group-inline label {
+    font-weight: normal;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
