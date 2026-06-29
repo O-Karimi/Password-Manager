@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Creadential
+from .models import Credential
 
 # Register your models here.
 
-admin.site.register(Creadential)
+admin.site.register(Credential)

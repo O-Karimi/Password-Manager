@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>My Vault</title>
+    </head>
+    <body>
+        <h2>Welcome to your Vault, {{ request.user.username }}</h2>
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+
+        <hr>
+
+        <h3>Add New Password</h3>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li style="color:green">{{message}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save to Vault</button>
+        </form>
+
+        <hr>
+
+        <h3>Your Saved Passwords</h3>
+        {% if credentials %}
+            <table border="1" cellpadding="5">
+                <thead>
+                    <tr>
+                        <th>Website</th>
+                        <th>Username</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cred in credentials %}
+                    <tr>
+                        <td>{{ cred.website_name }}</td>
+                        <td>{{ cred.username }}</td>
+                        <td>{{ cred.Password}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Your Vault is empty!</p>
+        {% endif %}
+    </body>
+</html>
