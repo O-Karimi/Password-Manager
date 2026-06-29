@@ -9,7 +9,8 @@ from .forms import CredentialForm
 from .encryption import encrypt_password
 
 from django.http import JsonResponse
-from .utils import generate_strong_password
+
+from .utils import generate_advanced_password
 
 # Create your views here.
 
@@ -76,5 +77,24 @@ def dashboard(request):
 
 @login_required
 def generate_password_api(request):
-    new_password = generate_strong_password()
-    return JsonResponse({"password": new_password})
+    
+    length = int(request.GET.get('length', 16))
+    use_upper = request.GET.get('use_upper', 'true') == 'true'
+    use_lower = request.GET.get('use_lower', 'true') == 'true'
+    use_numbers = request.GET.get('use_numbers', 'true') == 'true'
+    use_symbols = request.GET.get('use_symbols', 'true') == 'true'
+    custom_symbols = request.GET.get('custom_symbols', '')
+    exclude_ambiguous = request.GET.get('exclude_ambiguous', 'false') == 'true'
+    
+    is_passphrase = request.GET.get('is_passphrase', 'false') == 'true'
+    word_count = int(request.GET.get('word_count', 4))
+    separator = request.GET.get('separator', '-')
+
+    new_password = generate_advanced_password(
+        length=length, use_upper=use_upper, use_lower=use_lower, 
+        use_numbers=use_numbers, use_symbols=use_symbols, 
+        custom_symbols=custom_symbols, exclude_ambiguous=exclude_ambiguous,
+        is_passphrase=is_passphrase, word_count=word_count, separator=separator
+    )
+    
+    return JsonResponse({'password': new_password})
