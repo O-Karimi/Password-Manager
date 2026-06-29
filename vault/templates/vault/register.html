@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="ETF-8">
-        <title>Register - Secure Vault</title>
-    </head>
-    <body>
-        <h2>Create your Secure Vault</h2>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Register</button>
-        </form>
-        <p>Already have an account? <a href="{% url 'login' %}">Log in here</a>.</p>
-    </body>
-</html>
+{% extends "vault/base.html" %}
+
+{% block title %}Register - Secure Vault{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h2>Create your Secure Vault</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary w-100">Register</button>
+    </form>
+    <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Log in here</a>.</p>
+</div>
+{% endblock content %}
