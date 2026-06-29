@@ -65,7 +65,13 @@
                     <tr>
                         <td>{{ cred.website_name }}</td>
                         <td>{{ cred.username }}</td>
-                        <td>{{ cred.get_decrypted_password}}</td>
+                        <td>
+                            <span class="masked-pass">*************</span>
+                            <span class="real-pass" style="display: none">{{ cred.get_decrypted_password }}</span>
+
+                            <button type="button" onclick="togglePassword(this)" style="margin-left: 10px;">Reveal</button>
+                            <button type="button" onclick="copyPassword(this)">Copy</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -75,3 +81,37 @@
         {% endif %}
     </body>
 </html>
+
+<script>
+    function togglePassword(button) {
+
+        let td = button.parentElement;
+        let masked = td.querySelector('.masked-pass');
+        let real = td.querySelector('.real-pass');
+
+        if (real.style.display === 'none') {
+            real.style.display = 'inline';
+            masked.style.display = 'none';
+            button.innerText = 'Hide';
+        } else {
+            real.style.display = 'none';
+            masked.style.display = 'inline';
+            button.innerText = 'Reveal';
+        }
+    }
+
+    function copyPassword(button) {
+        let td = button.parentElement;
+        let realPassword = td.querySelector('.real-pass').innerText;
+
+        navigator.clipboard.writeText(realPassword).then(function() {
+            let originalText = button.innerText;
+            button.innerText = 'Copied!';
+            setTimeout(function() {
+                button.innerText = originalText;
+            }, 2000);
+        }).catch(function(err) {
+            alert('Failed to copy password.');
+        });
+    }
+</script>
