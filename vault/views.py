@@ -12,6 +12,8 @@ from django.http import JsonResponse
 
 from .utils import generate_advanced_password
 
+from django.shortcuts import render, redirect, get_object_or_404
+
 # Create your views here.
 
 def register(request):
@@ -98,3 +100,17 @@ def generate_password_api(request):
     )
     
     return JsonResponse({'password': new_password})
+
+@login_required
+def delete_credential(request, pk):
+    """Securely deletes a credential after verifying ownership."""
+    # Ensure the credential exists AND belongs to the currently logged-in user
+    credential = get_object_or_404(Credential, pk=pk, user=request.user)
+
+    # Only allow deletion via POST request for security
+    if request.method == 'POST':
+        website = credential.website_name
+        credential.delete()
+        messages.success(request, f'Password for {website} was permanently deleted.')
+    
+    return redirect('dashboard')

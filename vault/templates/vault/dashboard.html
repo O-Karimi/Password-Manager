@@ -91,6 +91,11 @@
                         <td class="action-buttons">
                             <button type="button" class="btn-sm" onclick="togglePassword(this)">Reveal</button>
                             <button type="button" class="btn-sm btn-secondary" onclick="copyPassword(this)">Copy</button>
+                            
+                            <form method="POST" action="{% url 'delete_credential' cred.id %}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete the password of username {{cred.username}} for {{ cred.website_name }} ? This cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-sm btn-danger">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
