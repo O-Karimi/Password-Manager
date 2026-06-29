@@ -23,12 +23,31 @@
             </ul>
         {% endif %}
 
+        {% if overwrite_warning %}
+            <div style="border: 2px solid red; padding: 15px; margin-bottom: 20px; max-width: 500px;">
+            <h4 style="color: red; margin-top: 0;">Warning: Credential Already Exists!</h4>
+            <p>You already have a saved password for the username <strong>{{ pending_data.username }}</strong> at <strong>{{ pending_data.website_name }}</strong>.</p>
+            <p>Do you want to replace your old password with this new one?</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="website_name" value="{{ pending_data.website_name }}">
+                <input type="hidden" name="username" value="{{ pending_data.username }}">
+                <input type="hidden" name="password" value="{{ pending_data.password }}">
+                
+                <input type="hidden" name="confirm_overwrite" value="True">
+
+                <button type="submit" style="background-color: red; color: white; font-weight: bold; padding: 5px 10px; cursor: pointer;">Yes, Overwrite Password</button>
+                <a href="{% url 'dashboard' %}" style="margin-left: 10px;">Cancel</a>
+            </form>
+        </div>
+    {% else %}
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Save to Vault</button>
         </form>
-
+    {% endif %}
         <hr>
 
         <h3>Your Saved Passwords</h3>
