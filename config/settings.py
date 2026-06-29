@@ -127,3 +127,5 @@ STATIC_URL = "static/"
 
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
+
+ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
