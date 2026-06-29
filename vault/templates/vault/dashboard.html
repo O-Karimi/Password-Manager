@@ -86,7 +86,7 @@
                         <td>{{ cred.username }}</td>
                         <td>
                             <span class="masked-pass">••••••••••••</span>
-                            <span class="real-pass" style="display: none;">{{ cred.get_decrypted_password }}</span>
+                            <span class="real-pass" style="display: none;">{{ cred.decrypted_password }}</span>
                         </td>
                         <td class="action-buttons">
                             <button type="button" class="btn-sm" onclick="togglePassword(this)">Reveal</button>

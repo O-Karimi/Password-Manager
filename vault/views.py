@@ -1,18 +1,18 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
-from .models import Credential
+from .models import Credential, UserProfile
 from .forms import CredentialForm
 
-from .encryption import encrypt_password
+from .encryption import encrypt_password, generate_user_keys, unlock_vault_key, decrypt_password
 
 from django.http import JsonResponse
 
 from .utils import generate_advanced_password
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, authenticate
 
 # Create your views here.
 
@@ -20,7 +20,17 @@ def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if( form.is_valid()):
-            form.save()
+            user = form.save()
+
+            raw_password = form.cleaned_data.get("password1") or request.POST.get("password1")
+            salt, encrypted_key = generate_user_keys( raw_password)
+
+            UserProfile.objects.create(
+                user=user,
+                salt=salt.decode("utf-8"),
+                encrypted_vault_key = encrypted_key.decode("uttf-8")
+            )
+
             messages.success(request, "Account created successfully!")
             return redirect("login")
     else:
@@ -28,12 +38,39 @@ def register(request):
         
     return render(request, 'vault/register.html', {"form": form}) 
 
+def custom_login(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if (form.is_valid):
+            user = form.get_user()
+            raw_password = request.POST.get("password")
+            login(request, user)
+
+            try:
+                profile = user.profile
+                vault_key = unlock_vault_key( raw_password, profile.salt.encode("utf-8"), profile.enctypted_vault_key.encode("utf-8"))
+                request.session["vault_key"] = vault_key.decode("utf-8")
+                return redirect("dashboard")
+            except Exception:
+                messages.error(request, "Cryptogtaphic error: Unable to unlock vault.")
+                return redirect("login")
+    else:
+        form = AuthenticationForm()
+    return render(request, "vault/login.html", {"form": form})
+
 @login_required
 def dashboard(request):
+    vault_key = request.session.get("vault_key")
+
+    if not vault_key:
+        messages.error(request, "Secure session expired. Please log in again.")
+        return redirect("login")
+
     overwrite_warning = False
     pending_data = None
 
     if request.method == "POST":
+        from .forms import CredentialForm
         form = CredentialForm(request.POST)
         if form.is_valid():
             website = form.cleaned_data["website_name"]
@@ -52,6 +89,8 @@ def dashboard(request):
                 overwrite_warning = True
                 pending_data = form.cleaned_data
             else:
+                encrypted_pass = encrypt_password(new_password, vault_key)
+
                 if existing_cred and is_confirmed:
                     existing_cred.encrypted_password = encrypt_password(new_password)
                     existing_cred.save()
@@ -64,13 +103,29 @@ def dashboard(request):
                     messages.success(request, f"Password for {credential.website_name} added to vault!")
                 return redirect("dashboard")
     else:
+        from .forms import CredentialForm
         form = CredentialForm()
 
-    user_credentials = Credential.objects.filter(user=request.user)
+    raw_credentials = Credential.objects.filter(user=request.user)
+
+    decrypted_credentials = []
+
+    for c in raw_credentials:
+        try:
+            dec = decrypt_password(c.encrypted_password, vault_key)
+        except Exception:
+            dec = "ERROR: Decryption Failed"
+        
+        decrypted_credentials.append({
+            "id":c.id,
+            "website_name": c.website_name,
+            "username": c.username,
+            "decrypted_password": dec
+        })
 
     context = {
         "form": form,
-        "credentials": user_credentials,
+        "credentials": decrypted_credentials,
         "overwrite_warning": overwrite_warning,
         "pending_data": pending_data,
     }
