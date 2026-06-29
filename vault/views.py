@@ -8,6 +8,9 @@ from .forms import CredentialForm
 
 from .encryption import encrypt_password
 
+from django.http import JsonResponse
+from .utils import generate_strong_password
+
 # Create your views here.
 
 def register(request):
@@ -70,3 +73,8 @@ def dashboard(request):
     }
 
     return render(request, "vault/dashboard.html", context)
+
+@login_required
+def generate_password_api(request):
+    new_password = generate_strong_password()
+    return JsonResponse({"password": new_password})

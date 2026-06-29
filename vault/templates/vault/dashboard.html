@@ -42,9 +42,13 @@
             </form>
         </div>
     {% else %}
-        <form method="POST">
+        <form method="POST" id="add-credential-form">
             {% csrf_token %}
             {{ form.as_p }}
+
+            <button type="button" onclick="fetchNewPassword()">Generate Strong Password</button>
+
+            <br>
             <button type="submit">Save to Vault</button>
         </form>
     {% endif %}
@@ -113,5 +117,19 @@
         }).catch(function(err) {
             alert('Failed to copy password.');
         });
+    }
+
+    function fetchNewPassword() {
+        fetch('/api/generate-password/')
+            .then(response => response.json())
+            .then(data => {
+                let passInput = document.getElementById('id_password');
+                passInput.type = 'text';
+                passInput.value = data.password;
+            })
+            .catch(error => {
+                alert('Error generating password.');
+                console.error(error);
+            });
     }
 </script>
