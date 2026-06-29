@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Credential
 from .forms import CredentialForm
 
+from .encryption import encrypt_password
+
 # Create your views here.
 
 def register(request):
@@ -45,12 +47,13 @@ def dashboard(request):
                 pending_data = form.cleaned_data
             else:
                 if existing_cred and is_confirmed:
-                    existing_cred.password = new_password
+                    existing_cred.encrypted_password = encrypt_password(new_password)
                     existing_cred.save()
                     messages.success(request, f"Password for {website} updated successfully!")
                 else:
                     credential = form.save(commit=False)
                     credential.user = request.user
+                    credential.encrypted_password = encrypt_password(new_password)
                     credential.save()
                     messages.success(request, f"Password for {credential.website_name} added to vault!")
                 return redirect("dashboard")
