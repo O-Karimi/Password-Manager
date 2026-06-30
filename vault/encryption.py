@@ -14,18 +14,21 @@ def derive_master_key(password: str, salt: bytes) -> bytes:
     return base64.urlsafe_b64encode(kdf.derive(password.encode('utf-8')))
 
 def generate_user_keys(password: str):
-    salt = os.urandom(16)
-    master_key = derive_master_key(password, salt)
+    raw_salt = os.urandom(16)
     
+    b64_salt = base64.urlsafe_b64encode(raw_salt)
+
+    master_key = derive_master_key(password, raw_salt)
     vault_key = Fernet.generate_key() 
     
     f = Fernet(master_key)
     encrypted_vault_key = f.encrypt(vault_key)
     
-    return salt, encrypted_vault_key
+    return b64_salt, encrypted_vault_key
 
-def unlock_vault_key(password: str, salt: bytes, encrypted_vault_key: bytes) -> bytes:
-    master_key = derive_master_key(password, salt)
+def unlock_vault_key(password: str, b64_salt: bytes, encrypted_vault_key: bytes) -> bytes:
+    raw_salt = base64.urlsafe_b64decode(b64_salt)
+    master_key = derive_master_key(password, raw_salt)
     f = Fernet(master_key)
     return f.decrypt(encrypted_vault_key)
 

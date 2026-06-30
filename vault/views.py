@@ -22,13 +22,17 @@ def register(request):
         if( form.is_valid()):
             user = form.save()
 
-            raw_password = form.cleaned_data.get("password1") or request.POST.get("password1")
+            raw_password = request.POST.get('password1') or request.POST.get('password')
+            if not raw_password:
+                messages.error(request, "Error capturing password from form. Please try again.")
+                return redirect('register')
+
             salt, encrypted_key = generate_user_keys( raw_password)
 
             UserProfile.objects.create(
                 user=user,
                 salt=salt.decode("utf-8"),
-                encrypted_vault_key = encrypted_key.decode("uttf-8")
+                encrypted_vault_key = encrypted_key.decode("utf-8")
             )
 
             messages.success(request, "Account created successfully!")
@@ -39,24 +43,35 @@ def register(request):
     return render(request, 'vault/register.html', {"form": form}) 
 
 def custom_login(request):
-    if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
-        if (form.is_valid):
-            user = form.get_user()
-            raw_password = request.POST.get("password")
+    """Custom login view to intercept the password and unlock the vault key."""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        raw_password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=raw_password)
+        
+        if user is not None:
             login(request, user)
-
+            
             try:
                 profile = user.profile
-                vault_key = unlock_vault_key( raw_password, profile.salt.encode("utf-8"), profile.enctypted_vault_key.encode("utf-8"))
-                request.session["vault_key"] = vault_key.decode("utf-8")
-                return redirect("dashboard")
+                vault_key = unlock_vault_key(
+                    raw_password, 
+                    profile.salt.encode('utf-8'), 
+                    profile.encrypted_vault_key.encode('utf-8')
+                )
+                request.session['vault_key'] = vault_key.decode('utf-8')
+                return redirect('dashboard')
             except Exception:
-                messages.error(request, "Cryptogtaphic error: Unable to unlock vault.")
-                return redirect("login")
+                messages.error(request, 'Cryptographic error: Unable to unlock vault.')
+                return redirect('login')
+        else:
+            messages.error(request, 'Invalid username or password.')
+            return redirect('login')
     else:
         form = AuthenticationForm()
-    return render(request, "vault/login.html", {"form": form})
+        
+    return render(request, 'vault/login.html', {'form': form})
 
 @login_required
 def dashboard(request):
@@ -92,13 +107,13 @@ def dashboard(request):
                 encrypted_pass = encrypt_password(new_password, vault_key)
 
                 if existing_cred and is_confirmed:
-                    existing_cred.encrypted_password = encrypt_password(new_password)
+                    existing_cred.encrypted_password = encrypted_pass
                     existing_cred.save()
                     messages.success(request, f"Password for {website} updated successfully!")
                 else:
                     credential = form.save(commit=False)
                     credential.user = request.user
-                    credential.encrypted_password = encrypt_password(new_password)
+                    credential.encrypted_password = encrypted_pass
                     credential.save()
                     messages.success(request, f"Password for {credential.website_name} added to vault!")
                 return redirect("dashboard")
