@@ -258,3 +258,8 @@ def export_passwords(request):
         writer.writerow([c.website_name, c.username, plain_password])
 
     return response
+
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'vault/home.html')

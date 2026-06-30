@@ -9,7 +9,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">🔒 Secure Vault</div>
+        <a href="{% url 'home' %}" class="nav-brand" style="color: white; text-decoration: none;">🔒 Secure Vault</a>
         <div class="nav-links">
             {% if user.is_authenticated %}
                 <span class="user-greeting">Hello, {{ user.username }}</span>

@@ -16,4 +16,6 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
 
     path('export/', views.export_passwords, name='export_passwords'),
+
+    path('', views.home, name='home'),
 ]

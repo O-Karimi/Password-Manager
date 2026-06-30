@@ -1,0 +1,33 @@
+{% extends "vault/base.html" %}
+
+{% block title %}Secure Vault - Zero-Knowledge Password Manager{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center">
+    <h1 class="hero-title">Your Digital Life, <span style="color: var(--primary);">Secured.</span></h1>
+    <p class="hero-subtitle">A military-grade password manager built on a Zero-Knowledge architecture. We don't know your passwords, and neither can anyone else.</p>
+    
+    <div class="hero-buttons mt-3">
+        <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 12px 24px; font-size: 1.1rem; display: inline-block; margin-right: 10px;">Get Started for Free</a>
+        <a href="{% url 'login' %}" class="btn-secondary" style="text-decoration: none; padding: 12px 24px; font-size: 1.1rem; display: inline-block;">Log In</a>
+    </div>
+</div>
+
+<div class="features-grid mt-3">
+    <div class="card text-center">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</h2>
+        <h3>Zero-Knowledge</h3>
+        <p class="text-muted">Your master key never leaves your device. Your data is encrypted before it ever reaches our database.</p>
+    </div>
+    <div class="card text-center">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🎲</h2>
+        <h3>Strong Generation</h3>
+        <p class="text-muted">Instantly generate cryptographically secure passwords and XKCD-style passphrases to stop brute-force attacks.</p>
+    </div>
+    <div class="card text-center">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">📥</h2>
+        <h3>Data Portability</h3>
+        <p class="text-muted">Your data belongs to you. Export your entire vault as a CSV file at any time with a single click.</p>
+    </div>
+</div>
+{% endblock content %}

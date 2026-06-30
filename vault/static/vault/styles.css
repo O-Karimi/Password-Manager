@@ -168,3 +168,30 @@ input[type="range"] {
     0% { transform: translateX(120%); opacity: 0; }
     100% { transform: translateX(0); opacity: 1; }
 }
+
+.hero-section {
+    padding: 60px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #475569;
+    margin-bottom: 30px;
+}
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 50px;
+}
+@media (max-width: 800px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 2.5rem; }
+}
