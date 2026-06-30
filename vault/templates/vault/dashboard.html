@@ -67,7 +67,12 @@
     </div>
 
     <div class="card vault-table-card">
-        <h3>Your Saved Passwords</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">Your Saved Passwords</h3>
+            {% if credentials %}
+                <a href="{% url 'export_passwords' %}" class="btn-secondary btn-sm" style="text-decoration: none;">📥 Export CSV</a>
+            {% endif %}
+        </div>
         <hr>
         {% if credentials %}
             <table class="styled-table">

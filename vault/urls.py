@@ -14,4 +14,6 @@ urlpatterns = [
     path('delete/<int:pk>/', views.delete_credential, name='delete_credential'),
 
     path("profile/", views.profile, name="profile"),
+
+    path('export/', views.export_passwords, name='export_passwords'),
 ]

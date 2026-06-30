@@ -17,6 +17,9 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth import update_session_auth_hash
 from .encryption import rekey_vault
 
+import csv
+from django.http import HttpResponse
+
 # Create your views here.
 
 def register(request):
@@ -229,3 +232,29 @@ def profile(request):
             return redirect('profile')
 
     return render(request, 'vault/profile.html')
+
+@login_required
+def export_passwords(request):
+    vault_key = request.session.get('vault_key')
+    
+    if not vault_key:
+        messages.error(request, 'Secure session expired. Please log in again to export data.')
+        return redirect('login')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="my_secure_vault.csv"'
+
+    writer = csv.writer(response)
+    
+    writer.writerow(['Website', 'Username', 'Password'])
+
+    credentials = Credential.objects.filter(user=request.user)
+    for c in credentials:
+        try:
+            plain_password = decrypt_password(c.encrypted_password, vault_key)
+        except Exception:
+            plain_password = "ERROR: Decryption Failed"
+            
+        writer.writerow([c.website_name, c.username, plain_password])
+
+    return response
