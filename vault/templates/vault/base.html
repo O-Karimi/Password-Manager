@@ -36,5 +36,26 @@
         {% block content %}
         {% endblock content %}
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let alerts = document.querySelectorAll('.alert');
+            
+            if (alerts.length > 0) {
+                setTimeout(function() {
+                    alerts.forEach(function(alert) {
+                        alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateX(120%)'; // Slide it back off screen
+                        
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 500); 
+                    });
+                }, 3500);
+            }
+        });
+    </script>   
+
 </body>
 </html>
