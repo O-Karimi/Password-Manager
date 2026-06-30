@@ -9,7 +9,7 @@
         <hr>
         
         {% if overwrite_warning %}
-            <div class="alert alert-danger">
+            <div class="alert alert-danger alert-permanent">
                 <h4 style="margin-top: 0;">Warning: Credential Exists!</h4>
                 <p>You already have a saved password for <strong>{{ pending_data.username }}</strong> at <strong>{{ pending_data.website_name }}</strong>.</p>
                 <p>Replace old password with this new one?</p>

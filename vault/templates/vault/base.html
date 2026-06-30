@@ -39,7 +39,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let alerts = document.querySelectorAll('.alert');
+            let alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
             
             if (alerts.length > 0) {
                 setTimeout(function() {
