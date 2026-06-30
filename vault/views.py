@@ -263,3 +263,6 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     return render(request, 'vault/home.html')
+
+def custom_404(request, exception=None):
+    return render(request, 'vault/404.html', status=404)

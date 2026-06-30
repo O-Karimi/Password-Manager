@@ -18,7 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from vault import views as vault_views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("vault.urls")),
 ]
+
+handler404 = vault_views.custom_404

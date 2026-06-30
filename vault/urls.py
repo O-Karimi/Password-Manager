@@ -18,4 +18,6 @@ urlpatterns = [
     path('export/', views.export_passwords, name='export_passwords'),
 
     path('', views.home, name='home'),
+
+    path('test-404/', views.custom_404, name='test_404'),
 ]
