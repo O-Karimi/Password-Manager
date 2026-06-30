@@ -14,6 +14,9 @@ from .utils import generate_advanced_password
 
 from django.contrib.auth import login, authenticate
 
+from django.contrib.auth import update_session_auth_hash
+from .encryption import rekey_vault
+
 # Create your views here.
 
 def register(request):
@@ -184,3 +187,45 @@ def delete_credential(request, pk):
         messages.success(request, f'Password for {website} was permanently deleted.')
     
     return redirect('dashboard')
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect('profile')
+
+        if not request.user.check_password(old_password):
+            messages.error(request, 'Incorrect current password.')
+            return redirect('profile')
+
+        try:
+            user_profile = request.user.profile
+            new_salt, new_encrypted_key = rekey_vault(
+                old_password, 
+                new_password, 
+                user_profile.salt.encode('utf-8'), 
+                user_profile.encrypted_vault_key.encode('utf-8')
+            )
+
+            user_profile.salt = new_salt.decode('utf-8')
+            user_profile.encrypted_vault_key = new_encrypted_key.decode('utf-8')
+            user_profile.save()
+
+            request.user.set_password(new_password)
+            request.user.save()
+
+            update_session_auth_hash(request, request.user)
+
+            messages.success(request, 'Master password updated securely!')
+            return redirect('dashboard')
+            
+        except Exception:
+            messages.error(request, 'Cryptographic error during password change.')
+            return redirect('profile')
+
+    return render(request, 'vault/profile.html')

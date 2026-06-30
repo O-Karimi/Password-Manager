@@ -1,0 +1,25 @@
+{% extends "vault/base.html" %}
+
+{% block title %}Settings - Secure Vault{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h2>Account Settings</h2>
+    <hr>
+    <h3 style="font-size: 1.1rem; margin-bottom: 15px;">Change Master Password</h3>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <label>Current Password:</label>
+        <input type="password" name="old_password" required class="mb-3">
+        
+        <label>New Password:</label>
+        <input type="password" name="new_password" required class="mb-3">
+        
+        <label>Confirm New Password:</label>
+        <input type="password" name="confirm_password" required class="mb-3">
+        
+        <button type="submit" class="btn-primary w-100">Update Password</button>
+    </form>
+</div>
+{% endblock content %}

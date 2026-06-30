@@ -41,3 +41,15 @@ def decrypt_password(encrypted_str: str, vault_key: str) -> str:
     f = Fernet(vault_key.encode('utf-8'))
     decrypted_bytes = f.decrypt(encrypted_str.encode('utf-8'))
     return decrypted_bytes.decode('utf-8')
+
+def rekey_vault(old_password: str, new_password: str, b64_salt: bytes, encrypted_vault_key: bytes):    
+    raw_vault_key = unlock_vault_key(old_password, b64_salt, encrypted_vault_key)
+    
+    new_raw_salt = os.urandom(16)
+    new_b64_salt = base64.urlsafe_b64encode(new_raw_salt)
+    new_master_key = derive_master_key(new_password, new_raw_salt)
+    
+    f = Fernet(new_master_key)
+    new_encrypted_vault_key = f.encrypt(raw_vault_key)
+    
+    return new_b64_salt, new_encrypted_vault_key

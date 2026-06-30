@@ -12,4 +12,6 @@ urlpatterns = [
     path("api/generate-password/", views.generate_password_api, name="generate_password"),
 
     path('delete/<int:pk>/', views.delete_credential, name='delete_credential'),
+
+    path("profile/", views.profile, name="profile"),
 ]
